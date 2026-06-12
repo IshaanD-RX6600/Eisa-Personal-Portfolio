@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
 // WebGL canvases touch `window`, so load them client-only.
 const EarthScene = dynamic(() => import('./components/EarthScene'), {
@@ -8,10 +9,13 @@ const EarthScene = dynamic(() => import('./components/EarthScene'), {
 });
 const Strands = dynamic(() => import('./components/Strands'), { ssr: false });
 
+const CANADA: [number, number] = [56, -106];
+
 export default function Home() {
+  const [focusRegion, setFocusRegion] = useState<[number, number] | null>(null);
+
   const startPresentation = () => {
-    // TODO: wire up what "Start presentation" should do.
-    console.log('Start presentation');
+    setFocusRegion(CANADA);
   };
 
   return (
@@ -37,7 +41,7 @@ export default function Home() {
 
       {/* Spinning globe (transparent canvas sits over the background) */}
       <div className="pointer-events-none absolute inset-0 z-10">
-        <EarthScene />
+        <EarthScene focusRegion={focusRegion} />
       </div>
 
       {/* Foreground UI */}
