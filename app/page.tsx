@@ -13,9 +13,15 @@ const CANADA: [number, number] = [56, -106];
 
 export default function Home() {
   const [focusRegion, setFocusRegion] = useState<[number, number] | null>(null);
+  const [resetSignal, setResetSignal] = useState(0);
 
   const startPresentation = () => {
     setFocusRegion(CANADA);
+  };
+
+  const reset = () => {
+    setFocusRegion(null);
+    setResetSignal((n) => n + 1);
   };
 
   return (
@@ -41,7 +47,7 @@ export default function Home() {
 
       {/* Spinning globe (transparent canvas sits over the background) */}
       <div className="pointer-events-none absolute inset-0 z-10">
-        <EarthScene focusRegion={focusRegion} />
+        <EarthScene focusRegion={focusRegion} resetSignal={resetSignal} />
       </div>
 
       {/* Foreground UI */}
@@ -52,12 +58,22 @@ export default function Home() {
         <p className="mt-2 text-sm text-white/60 sm:text-base">Portfolio</p>
       </header>
 
-      <button
-        onClick={startPresentation}
-        className="absolute bottom-6 right-6 z-20 rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-      >
-        Start presentation
-      </button>
+      <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3">
+        {focusRegion && (
+          <button
+            onClick={reset}
+            className="rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          >
+            Reset
+          </button>
+        )}
+        <button
+          onClick={startPresentation}
+          className="rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        >
+          Start presentation
+        </button>
+      </div>
     </main>
   );
 }

@@ -14,9 +14,13 @@ const EARTH_RADIUS = 1; // R — model is normalized to this radius on load
 const SPIN_SPEED = 0.25; // radians/sec the globe spins while idle
 const CAMERA_DISTANCE = 3; // fixed idle camera distance; smaller = bigger globe
 const LON_OFFSET = 0; // degrees — tune to correct the GLB texture seam
-const ZOOM_DISTANCE = 0.7; // gap between camera and surface at the close-up
+const ZOOM_DISTANCE = 1.1; // gap between camera and surface at the close-up
 const ANIM_DURATION = 2.2; // seconds for the zoom-in
 const CANADA: [number, number] = [56, -106]; // ~56°N, 106°W
+
+const POINTER_MODEL_PATH = '/map_pointer_3d_icon.glb';
+const KITCHENER: [number, number] = [43.45, -80.49]; // Kitchener, Ontario
+const POINTER_HEIGHT = 0.12; // pin height relative to the earth radius (1)
 // ──────────────────────────────────────────────────────────────────────────────
 
 const DEG2RAD = Math.PI / 180;
@@ -50,13 +54,15 @@ function Earth({ groupRef, spinning }: EarthProps) {
   const { scene } = useGLTF(EARTH_MODEL_PATH);
 
   // Normalize any source GLB: recenter to the origin and scale to EARTH_RADIUS.
+  // Use half the box's largest dimension as the radius (the true sphere radius);
+  // a bounding *sphere* of the box would be ~1.73x too large for a globe.
   const { center, scale } = useMemo(() => {
-    const sphere = new THREE.Box3()
-      .setFromObject(scene)
-      .getBoundingSphere(new THREE.Sphere());
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = box.getSize(new THREE.Vector3());
+    const radius = Math.max(size.x, size.y, size.z) / 2;
     return {
-      center: sphere.center.clone(),
-      scale: sphere.radius > 0 ? EARTH_RADIUS / sphere.radius : 1,
+      center: box.getCenter(new THREE.Vector3()),
+      scale: radius > 0 ? EARTH_RADIUS / radius : 1,
     };
   }, [scene]);
 
@@ -67,13 +73,59 @@ function Earth({ groupRef, spinning }: EarthProps) {
     }
   });
 
+  // The rotation group stays in world units (surface at EARTH_RADIUS) so markers
+  // can be placed directly via latLonToVector3; only the model is scaled.
   return (
-    <group ref={groupRef} scale={scale}>
-      <primitive object={scene} position={[-center.x, -center.y, -center.z]} />
+    <group ref={groupRef}>
+      <group scale={scale}>
+        <primitive
+          object={scene}
+          position={[-center.x, -center.y, -center.z]}
+        />
+      </group>
+      <Marker lat={KITCHENER[0]} lon={KITCHENER[1]} />
     </group>
   );
 }
 useGLTF.preload(EARTH_MODEL_PATH);
+
+// A 3D pin standing on the globe's surface at a given lat/lon. Lives inside the
+// rotating group, so it spins locked to its location.
+function Marker({ lat, lon }: { lat: number; lon: number }) {
+  const { scene } = useGLTF(POINTER_MODEL_PATH);
+  const model = useMemo(() => scene.clone(true), [scene]);
+
+  // Scale the pin to POINTER_HEIGHT and sit its base on the local origin.
+  const { scale, baseOffset } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const height = size.y || Math.max(size.x, size.z) || 1;
+    return {
+      scale: POINTER_HEIGHT / height,
+      baseOffset: new THREE.Vector3(-center.x, -box.min.y, -center.z),
+    };
+  }, [model]);
+
+  // Place at the surface point and stand it up along the surface normal.
+  const { position, quaternion } = useMemo(() => {
+    const pos = latLonToVector3(lat, lon, EARTH_RADIUS);
+    const q = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      pos.clone().normalize(),
+    );
+    return { position: pos, quaternion: q };
+  }, [lat, lon]);
+
+  return (
+    <group position={position} quaternion={quaternion}>
+      <group scale={scale}>
+        <primitive object={model} position={baseOffset} />
+      </group>
+    </group>
+  );
+}
+useGLTF.preload(POINTER_MODEL_PATH);
 
 type TweenState = {
   active: boolean;
@@ -88,9 +140,15 @@ type CameraFocusProps = {
   earthRef: React.RefObject<THREE.Group | null>;
   spinning: React.RefObject<boolean>;
   focusRegion: [number, number] | null;
+  resetSignal: number;
 };
 
-function CameraFocus({ earthRef, spinning, focusRegion }: CameraFocusProps) {
+function CameraFocus({
+  earthRef,
+  spinning,
+  focusRegion,
+  resetSignal,
+}: CameraFocusProps) {
   const camera = useThree((s) => s.camera);
   const tween = useRef<TweenState | null>(null);
   const lookAt = useRef(new THREE.Vector3(0, 0, 0)); // camera starts looking at origin
@@ -122,6 +180,19 @@ function CameraFocus({ earthRef, spinning, focusRegion }: CameraFocusProps) {
     };
   };
 
+  // Fly back to the opening view and resume the idle spin.
+  const resetView = () => {
+    spinning.current = true;
+    tween.current = {
+      active: true,
+      elapsed: 0,
+      fromPos: camera.position.clone(),
+      toPos: new THREE.Vector3(0, 0, CAMERA_DISTANCE),
+      fromTarget: lookAt.current.clone(),
+      toTarget: new THREE.Vector3(0, 0, 0),
+    };
+  };
+
   useFrame((_, delta) => {
     const t = tween.current;
     if (!t || !t.active) return;
@@ -143,19 +214,30 @@ function CameraFocus({ earthRef, spinning, focusRegion }: CameraFocusProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusRegion]);
 
+  // Reset to the opening view when the signal increments (skip initial mount).
+  useEffect(() => {
+    if (resetSignal > 0) resetView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
+
   return null;
 }
 
 type EarthSceneProps = {
   /** Set to a [lat, lon] to fly the camera in and zoom on that region. */
   focusRegion?: [number, number] | null;
+  /** Increment to fly the camera back to the opening view. */
+  resetSignal?: number;
 };
 
 /**
- * Spinning Earth that zooms onto a region when `focusRegion` is provided.
- * Defaults its target reference to Canada.
+ * Spinning Earth that zooms onto a region when `focusRegion` is provided, and
+ * flies back to the opening view when `resetSignal` increments.
  */
-export default function EarthScene({ focusRegion = null }: EarthSceneProps) {
+export default function EarthScene({
+  focusRegion = null,
+  resetSignal = 0,
+}: EarthSceneProps) {
   const earthRef = useRef<THREE.Group>(null);
   const spinning = useRef(true);
 
@@ -170,6 +252,7 @@ export default function EarthScene({ focusRegion = null }: EarthSceneProps) {
         earthRef={earthRef}
         spinning={spinning}
         focusRegion={focusRegion}
+        resetSignal={resetSignal}
       />
     </Canvas>
   );
