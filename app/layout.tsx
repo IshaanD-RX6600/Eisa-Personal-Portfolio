@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Coming Soon",
-  description: "Website coming soon",
+  title: "Canada — Map & 3D View",
+  description: "Interactive Leaflet map and 3D model of Canada",
 };
 
 export default function RootLayout({
