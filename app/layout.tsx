@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Canada — Map & 3D View",
-  description: "Interactive Leaflet map and 3D model of Canada",
+  title: "Eisa Siddiqui — Portfolio",
+  description: "Personal portfolio of Eisa Siddiqui",
 };
 
 export default function RootLayout({
