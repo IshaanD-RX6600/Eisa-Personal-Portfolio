@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Indigenous Architecture &amp; Reconciliation in Canada</title>
+
+<!--
+  Grade 12 project: an interactive 3D globe tour of six Canadian buildings
+  tied to Indigenous architecture and reconciliation.
+
+  HOW IT WORKS (for presenting):
+  - Built on globe.gl (a wrapper around Three.js), loaded from a CDN below.
+  - All six sites live in the SITES array near the top of the <script>. Edit
+    text/coordinates/photos there.
+  - The globe auto-rotates; clicking a marker flies the camera in and opens an
+    info panel; "Start Tour" auto-flies through all six in narrative order.
+  - No build step. Just open this file in a browser.
+-->
+
+<style>
+  /* ---------- Design tokens ---------- */
+  :root {
+    --amber: #e8a849;        /* warm ochre accent (earth tone, not a motif) */
+    --amber-soft: #f2c987;
+    --ink: #f4f1ea;          /* near-white text */
+    --muted: #b9b3a7;        /* secondary text */
+    --panel-bg: rgba(18, 16, 14, 0.92);
+    --space: #04060a;        /* black space background fallback */
+    --sans: "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--space);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+
+  /* The globe renders into this full-screen container */
+  #globe { position: fixed; inset: 0; }
+
+  /* ---------- Title overlay (top center) ---------- */
+  #title {
+    position: fixed;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+    width: min(92vw, 760px);
+  }
+  #title h1 {
+    margin: 0;
+    font-size: clamp(18px, 3.4vw, 30px);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9);
+  }
+  #title p {
+    margin: 6px 0 0;
+    font-size: clamp(11px, 1.6vw, 14px);
+    color: var(--muted);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+  }
+
+  /* ---------- Glowing teardrop markers ---------- */
+  .marker {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    transition: transform 0.25s ease;
+    transform-origin: center bottom;
+  }
+  .marker:hover { transform: scale(1.45); z-index: 30; }
+
+  /* teardrop pin: a rounded square rotated 45deg (round top, pointed bottom) */
+  .marker .pin {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    background: radial-gradient(circle at 35% 30%, var(--amber-soft), var(--amber) 65%);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 10px 2px rgba(232, 168, 73, 0.85),
+                0 0 22px 6px rgba(232, 168, 73, 0.35);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  /* small dark dot in the pin's center for an architectural, clean look */
+  .marker .pin::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: rgba(20, 16, 12, 0.85);
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 10px 2px rgba(232,168,73,0.85), 0 0 22px 6px rgba(232,168,73,0.30); }
+    50%      { box-shadow: 0 0 14px 3px rgba(232,168,73,1.00), 0 0 34px 10px rgba(232,168,73,0.55); }
+  }
+
+  /* hover tooltip with the site name */
+  .marker .label {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: rgba(10, 9, 8, 0.9);
+    border: 1px solid rgba(232, 168, 73, 0.4);
+    color: var(--ink);
+    font-size: 12px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .marker:hover .label { opacity: 1; }
+
+  /* ---------- Slide-in info panel (from the right) ---------- */
+  #panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(92vw, 400px);
+    background: var(--panel-bg);
+    backdrop-filter: blur(8px);
+    border-left: 1px solid rgba(232, 168, 73, 0.25);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6);
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  #panel.open { transform: translateX(0); }
+
+  #panel .close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ink);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  #panel .close:hover { background: rgba(232, 168, 73, 0.25); }
+
+  /* building photo (placeholder block until real photos are added) */
+  #panel .photo {
+    width: 100%;
+    height: 200px;
+    flex: none;
+    background: linear-gradient(135deg, #2a2118, #4a3a22 60%, #6b5128);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    object-fit: cover;
+  }
+
+  #panel .body { padding: 22px 24px 30px; }
+  #panel .eyebrow {
+    color: var(--amber);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  #panel h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  #panel .meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 4px;
+  }
+  #panel .meta strong { color: var(--ink); font-weight: 600; }
+
+  #panel .recon-heading {
+    color: var(--amber);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 22px 0 8px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  #panel .recon { font-size: 15px; line-height: 1.6; color: var(--ink); }
+
+  /* ---------- Control buttons (bottom center) ---------- */
+  #controls {
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 30;
+  }
+  .btn {
+    border: 1px solid rgba(232, 168, 73, 0.55);
+    background: rgba(232, 168, 73, 0.12);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 12px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
+  }
+  .btn:hover { background: rgba(232, 168, 73, 0.28); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--amber); color: #1a130a; border-color: var(--amber); }
+  .btn.primary:hover { background: var(--amber-soft); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ---------- Tour caption (narrative arc, shown during the tour) ---------- */
+  #caption {
+    position: fixed;
+    bottom: 92px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    text-align: center;
+    width: min(92vw, 620px);
+    z-index: 30;
+    color: var(--amber-soft);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+  }
+  #caption.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Intro / legend card (dismissible, shown on load) ---------- */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 4, 8, 0.72);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.5s ease;
+  }
+  #intro.hidden { opacity: 0; pointer-events: none; }
+  #intro .card {
+    width: min(92vw, 480px);
+    background: var(--panel-bg);
+    border: 1px solid rgba(232, 168, 73, 0.3);
+    border-radius: 16px;
+    padding: 30px 32px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  }
+  #intro h2 { margin: 0 0 4px; font-size: 22px; }
+  #intro .sub { color: var(--amber); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+  #intro p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+  #intro ul { margin: 0 0 22px; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  #intro ul b { color: var(--ink); }
+
+  /* loading hint */
+  #loading {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 14px; letter-spacing: 0.1em; z-index: 5;
+  }
+
+  /* On small screens the panel covers the screen for readability */
+  @media (max-width: 520px) {
+    #panel { width: 100vw; border-left: none; }
+    #controls { flex-wrap: wrap; width: 92vw; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+  <div id="loading">Loading globe…</div>
+  <div id="globe"></div>
+
+  <!-- Title overlay -->
+  <header id="title">
+    <h1>Indigenous Architecture &amp; Reconciliation in Canada</h1>
+    <p>Six buildings, one conversation about who designs the nation — and on whose land.</p>
+  </header>
+
+  <!-- Slide-in info panel (filled in by JS) -->
+  <aside id="panel" aria-hidden="true">
+    <button class="close" aria-label="Close panel">&times;</button>
+    <div class="photo" id="panel-photo"></div>
+    <div class="body">
+      <p class="eyebrow" id="panel-eyebrow">Site</p>
+      <h2 id="panel-name"></h2>
+      <p class="meta" id="panel-location"></p>
+      <p class="meta" id="panel-architect"></p>
+      <p class="recon-heading">Reconciliation</p>
+      <p class="recon" id="panel-recon"></p>
+    </div>
+  </aside>
+
+  <!-- Narrative caption shown during the guided tour -->
+  <div id="caption"></div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <button class="btn primary" id="tour-btn">▶ Start Tour</button>
+    <button class="btn" id="reset-btn">Reset</button>
+  </div>
+
+  <!-- Intro / legend card -->
+  <div id="intro">
+    <div class="card">
+      <div class="sub">Grade 12 — Interactive Presentation</div>
+      <h2>Welcome</h2>
+      <p>
+        This is a 3D map of six Canadian buildings that each say something
+        different about reconciliation through architecture — from
+        Indigenous-led national landmarks to a Nation building on its own
+        reclaimed land.
+      </p>
+      <ul>
+        <li><b>Drag</b> to spin the globe, <b>scroll</b> to zoom.</li>
+        <li><b>Click a glowing marker</b> to fly in and read about a site.</li>
+        <li><b>Start Tour</b> flies through all six in narrative order.</li>
+      </ul>
+      <button class="btn primary" id="intro-btn">Begin</button>
+    </div>
+  </div>
+
+  <!-- ============ DEPENDENCIES (CDN, Three.js-based) ============ -->
+  <!-- globe.gl ships a standalone UMD bundle that includes Three.js. -->
+  <script src="https://unpkg.com/globe.gl@2.34.4/dist/globe.gl.min.js"></script>
+
+  <script>
+  /* =====================================================================
+     1) SITE DATA — edit text, coordinates, and photos here.
+        `chapter` groups sites for the guided tour's narrative arc.
+        `photo` is "" for now → shows a placeholder block.
+     ===================================================================== */
+  const SITES = [
+    {
+      id: 1,
+      name: "Canadian Museum of History",
+      location: "Gatineau, QC",
+      architect: "Douglas Cardinal (Blackfoot/Métis)",
+      year: 1989,
+      lat: 45.43, lng: -75.71,
+      chapter: "Museums — who designs the landmarks?",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "Indigenous-LED design. Flowing forms evoke the land carved by glaciers — " +
+        "proof that reconciliation means Indigenous architects shaping national " +
+        "landmarks, not just being represented in them."
+    },
+    {
+      id: 2,
+      name: "Museum of Anthropology, UBC",
+      location: "Vancouver, BC",
+      architect: "Arthur Erickson",
+      year: 1976,
+      lat: 49.27, lng: -123.26,
+      chapter: "Museums — who designs the landmarks?",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "Longhouse-inspired, gives dignity to Northwest Coast art — but designed " +
+        "by a non-Indigenous architect, raising the question of inspiration vs. " +
+        "appropriation. That tension is part of the story."
+    },
+    {
+      id: 3,
+      name: "National Centre for Truth and Reconciliation",
+      location: "Winnipeg, MB",
+      architect: null,
+      year: null,
+      lat: 49.81, lng: -97.13,
+      chapter: "Truth & Records — the archive of repair",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "Holds residential school records and survivor testimony — the most " +
+        "literal architectural link to truth-telling and repair."
+    },
+    {
+      id: 4,
+      name: "Gordon Oakes Red Bear Student Centre",
+      location: "Saskatoon, SK",
+      architect: "Douglas Cardinal",
+      year: 2016,
+      lat: 52.13, lng: -106.63,
+      chapter: "Student Spaces — belonging & empowerment",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "A circular gathering space built FOR Indigenous students — design as " +
+        "belonging and empowerment on campus."
+    },
+    {
+      id: 5,
+      name: "First Peoples House, University of Victoria",
+      location: "Victoria, BC",
+      architect: null,
+      year: null,
+      lat: 48.46, lng: -123.31,
+      chapter: "Student Spaces — belonging & empowerment",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "A longhouse-form ceremonial and gathering space that brings Indigenous " +
+        "ways of meeting into a Western institution."
+    },
+    {
+      id: 6,
+      name: "Senakw",
+      location: "Vancouver, BC",
+      architect: "Squamish Nation development",
+      year: null,
+      lat: 49.27, lng: -123.14,
+      chapter: "An Indigenous-Led Future — not a museum exhibit",
+      photo: "", // TODO: replace with real photo URL
+      recon:
+        "The Squamish Nation building a major sustainable urban development on its " +
+        "OWN reclaimed land — reconciliation as an Indigenous-led FUTURE, not a " +
+        "museum exhibit."
+    }
+  ];
+
+  /* =====================================================================
+     2) CAMERA / TIMING CONSTANTS — tweak the cinematic feel here.
+     ===================================================================== */
+  const FLY_MS      = 1800;                                   // marker fly-in duration
+  const SITE_ALT    = 0.6;                                    // close-up altitude
+  const TOUR_PAUSE  = 5000;                                   // ms paused on each site
+  const HOME_VIEW   = { lat: 58, lng: -96, altitude: 2.4 };   // full-globe view over Canada
+
+  // Texture URLs from the three-globe example assets (served via unpkg CDN).
+  const TEX = {
+    blueMarble: "https://unpkg.com/three-globe@2.31.0/example/img/earth-blue-marble.jpg",
+    topology:   "https://unpkg.com/three-globe@2.31.0/example/img/earth-topology.png",
+    stars:      "https://unpkg.com/three-globe@2.31.0/example/img/night-sky.png"
+  };
+
+  /* =====================================================================
+     3) BUILD THE GLOBE
+     ===================================================================== */
+  const world = Globe()(document.getElementById("globe"))
+    .globeImageUrl(TEX.blueMarble)     // NASA blue-marble day texture
+    .bumpImageUrl(TEX.topology)        // topology/bump for subtle relief
+    .backgroundImageUrl(TEX.stars)     // starfield (falls back to black if it fails)
+    .backgroundColor("#04060a")
+    .showAtmosphere(true)
+    .atmosphereColor("#7da7d9")        // soft blue atmospheric glow
+    .atmosphereAltitude(0.18)
+
+    /* ---- expanding pulse rings under each marker (reads as "live") ---- */
+    .ringsData(SITES)
+    .ringColor(() => (t) => `rgba(232, 168, 73, ${Math.sqrt(1 - t)})`)
+    .ringMaxRadius(3.2)
+    .ringPropagationSpeed(1.4)
+    .ringRepeatPeriod(1700)
+
+    /* ---- custom HTML teardrop markers ---- */
+    .htmlElementsData(SITES)
+    .htmlElement((d) => {
+      const el = document.createElement("div");
+      el.className = "marker";
+      el.innerHTML = `<div class="pin"></div><div class="label">${d.name}</div>`;
+      // Clicking a marker focuses that site.
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (tourState === "running") return; // ignore clicks mid-tour
+        focusSite(d);
+      });
+      return el;
+    })
+    // Hide/disable markers on the far side of the globe so you can't click through it.
+    .htmlElementVisibilityModifier((el, isVisible) => {
+      el.style.opacity = isVisible ? "1" : "0";
+      el.style.pointerEvents = isVisible ? "auto" : "none";
+    });
+
+  // Hide the loading hint once the globe image has loaded.
+  world.onGlobeReady(() => {
+    const l = document.getElementById("loading");
+    if (l) l.style.display = "none";
+  });
+
+  /* ---- slow auto-rotation that pauses on user interaction ---- */
+  const controls = world.controls();
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.45;
+  controls.enableDamping = true;
+  // Pause rotation the moment the user starts dragging/zooming.
+  controls.addEventListener("start", () => { controls.autoRotate = false; });
+
+  // Keep the canvas sized to the window (responsive / projector-friendly).
+  function onResize() {
+    world.width(window.innerWidth).height(window.innerHeight);
+  }
+  window.addEventListener("resize", onResize);
+  onResize();
+
+  /* =====================================================================
+     4) INFO PANEL
+     ===================================================================== */
+  const panel = document.getElementById("panel");
+
+  function openPanel(site) {
+    document.getElementById("panel-eyebrow").textContent = `Site ${site.id} of ${SITES.length}`;
+    document.getElementById("panel-name").textContent = site.name;
+    document.getElementById("panel-location").textContent = site.location;
+
+    // architect + year line (handles sites with no listed architect)
+    const arch = document.getElementById("panel-architect");
+    if (site.architect) {
+      arch.innerHTML = `Architect: <strong>${site.architect}</strong>` +
+        (site.year ? ` · ${site.year}` : "");
+      arch.style.display = "";
+    } else if (site.year) {
+      arch.innerHTML = `<strong>${site.year}</strong>`;
+      arch.style.display = "";
+    } else {
+      arch.style.display = "none";
+    }
+
+    document.getElementById("panel-recon").textContent = site.recon;
+
+    // Building photo: use a real image if provided, else a labelled placeholder.
+    const photo = document.getElementById("panel-photo");
+    if (site.photo) {
+      photo.style.background = `center/cover no-repeat url("${site.photo}")`;
+      photo.textContent = "";
+    } else {
+      photo.style.background = "";
+      photo.textContent = "PHOTO PLACEHOLDER — add a URL in SITES[].photo";
+    }
+
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+  }
+
+  function closePanel() {
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+  }
+
+  /* Fly the camera to a site and open its panel. */
+  function focusSite(site) {
+    world.pointOfView({ lat: site.lat, lng: site.lng, altitude: SITE_ALT }, FLY_MS);
+    openPanel(site);
+  }
+
+  /* Return to the full-globe view and resume rotation. */
+  function resetView() {
+    closePanel();
+    world.pointOfView(HOME_VIEW, 1500);
+    controls.autoRotate = true;
+  }
+
+  // Panel close button → fly back out to the full globe.
+  panel.querySelector(".close").addEventListener("click", () => {
+    if (tourState === "running") stopTour();
+    resetView();
+  });
+
+  /* =====================================================================
+     5) GUIDED TOUR — auto-fly through all six sites in order.
+        The narrative arc: Museums → Truth/Records → Student Spaces →
+        Indigenous-Led Future (driven by each site's `chapter`).
+     ===================================================================== */
+  let tourState = "idle";        // "idle" | "running"
+  let tourTimer = null;          // current pause timeout
+  let tourResolve = null;        // resolver so Stop can cut a pause short
+
+  const tourBtn = document.getElementById("tour-btn");
+  const caption = document.getElementById("caption");
+
+  // A cancellable sleep used between tour steps.
+  function sleep(ms) {
+    return new Promise((resolve) => {
+      tourResolve = resolve;
+      tourTimer = setTimeout(() => { tourResolve = null; resolve(); }, ms);
+    });
+  }
+  function cancelSleep() {
+    if (tourTimer) { clearTimeout(tourTimer); tourTimer = null; }
+    if (tourResolve) { tourResolve(); tourResolve = null; }
+  }
+
+  function showCaption(text) {
+    caption.textContent = text;
+    caption.classList.add("show");
+  }
+  function hideCaption() { caption.classList.remove("show"); }
+
+  async function startTour() {
+    if (tourState === "running") return;
+    tourState = "running";
+    controls.autoRotate = false;
+    tourBtn.disabled = true;
+    tourBtn.textContent = "Touring…";
+
+    for (let i = 0; i < SITES.length; i++) {
+      if (tourState !== "running") break;       // stopped?
+      const site = SITES[i];
+
+      showCaption(site.chapter);                // narrate the current chapter
+      world.pointOfView({ lat: site.lat, lng: site.lng, altitude: SITE_ALT }, FLY_MS);
+      openPanel(site);
+
+      await sleep(FLY_MS + TOUR_PAUSE);         // wait for fly-in + pause
+      if (tourState !== "running") break;       // stopped during the pause?
+    }
+
+    // Natural end → reset everything back to the start.
+    if (tourState === "running") stopTour(true);
+  }
+
+  /* Stop the tour. `goHome` true → also fly back to the full-globe view. */
+  function stopTour(goHome) {
+    tourState = "idle";
+    cancelSleep();
+    hideCaption();
+    tourBtn.disabled = false;
+    tourBtn.textContent = "▶ Start Tour";
+    if (goHome) resetView();
+  }
+
+  tourBtn.addEventListener("click", startTour);
+
+  // Reset button: stops any tour and returns to the opening full-globe view.
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (tourState === "running") stopTour(true);
+    else resetView();
+  });
+
+  /* =====================================================================
+     6) INTRO CARD — dismiss on "Begin".
+     ===================================================================== */
+  const intro = document.getElementById("intro");
+  document.getElementById("intro-btn").addEventListener("click", () => {
+    intro.classList.add("hidden");
+  });
+  </script>
+</body>
+</html>
