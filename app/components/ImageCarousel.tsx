@@ -1,0 +1,278 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+export interface CarouselImage {
+  src: string;
+  alt: string;
+  caption: string;
+}
+
+interface ImageCarouselProps {
+  images: CarouselImage[];
+  /** Time each image is held before auto-advancing. */
+  intervalMs?: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEEL — transition timing / easing, tweak the motion here.
+// ─────────────────────────────────────────────────────────────────────────────
+const FADE_MS = 650; //   slide enter/exit length
+const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // soft, settled overshoot-free
+const INNER_BG = '#0b0f17';
+const DEFAULT_INTERVAL_MS = 5000;
+const SWIPE_THRESHOLD = 40; // px of horizontal travel to register a swipe
+const TAP_SLOP = 6; //        movement under this counts as a tap (advance)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return reduced;
+}
+
+export default function ImageCarousel({
+  images,
+  intervalMs = DEFAULT_INTERVAL_MS,
+}: ImageCarouselProps) {
+  const count = images.length;
+  const reduced = usePrefersReducedMotion();
+
+  const [index, setIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null); // exiting slide
+  const [direction, setDirection] = useState(1); //                 1 fwd, -1 back
+  const [animKey, setAnimKey] = useState(0); //                     retriggers anims
+  const [paused, setPaused] = useState(false);
+
+  // Current index mirrored to a ref so the imperative pointer/keyboard handlers
+  // always read the latest value without re-binding.
+  const indexRef = useRef(0);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  const go = useCallback(
+    (next: number, dir?: number) => {
+      const curr = indexRef.current;
+      if (next === curr || next < 0 || next >= count) return;
+      setDirection(dir ?? (next > curr ? 1 : -1));
+      setPrevIndex(curr);
+      setIndex(next);
+      setAnimKey((k) => k + 1);
+    },
+    [count],
+  );
+
+  const goNext = useCallback(() => {
+    const curr = indexRef.current;
+    go((curr + 1) % count, 1);
+  }, [go, count]);
+
+  const goPrev = useCallback(() => {
+    const curr = indexRef.current;
+    go((curr - 1 + count) % count, -1);
+  }, [go, count]);
+
+  // Once a slide has finished exiting, drop it from the DOM.
+  useEffect(() => {
+    if (prevIndex === null) return;
+    const t = window.setTimeout(() => setPrevIndex(null), FADE_MS);
+    return () => window.clearTimeout(t);
+  }, [animKey, prevIndex]);
+
+  // Auto-advance. With motion allowed, the progress bar's animationend drives the
+  // step, so the bar and the timing stay in lockstep (including hover-pause).
+  // Reduced motion has no bar, so fall back to a plain interval.
+  useEffect(() => {
+    if (!reduced || paused || count <= 1) return;
+    const id = window.setInterval(goNext, intervalMs);
+    return () => window.clearInterval(id);
+  }, [reduced, paused, count, intervalMs, goNext, animKey]);
+
+  // Keyboard: ← / → step, Home / End jump to the ends.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (count <= 1) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      goNext();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goPrev();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      go(0, -1);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      go(count - 1, 1);
+    }
+  };
+
+  // Pointer: tap to advance, drag/swipe horizontally to step.
+  const drag = useRef<{ x: number; y: number; active: boolean }>({
+    x: 0,
+    y: 0,
+    active: false,
+  });
+  const onPointerDown = (e: React.PointerEvent) => {
+    drag.current = { x: e.clientX, y: e.clientY, active: true };
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!drag.current.active) return;
+    drag.current.active = false;
+    const dx = e.clientX - drag.current.x;
+    const dy = e.clientY - drag.current.y;
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) goNext();
+      else goPrev();
+    } else if (Math.abs(dx) < TAP_SLOP && Math.abs(dy) < TAP_SLOP) {
+      goNext();
+    }
+  };
+
+  // Per-slide animation names (reduced motion → plain fade, no travel/zoom).
+  const enterAnim = reduced
+    ? 'carouselFadeIn'
+    : direction > 0
+      ? 'carouselEnterRight'
+      : 'carouselEnterLeft';
+  const exitAnim = reduced
+    ? 'carouselFadeOut'
+    : direction > 0
+      ? 'carouselExitLeft'
+      : 'carouselExitRight';
+
+  return (
+    <div>
+      {/* Stage */}
+      <div
+        className="group relative mt-10 aspect-[16/9] w-full select-none overflow-hidden rounded-2xl ring-1 ring-white/10"
+        style={{ background: INNER_BG }}
+        role="group"
+        aria-roledescription="carousel"
+        aria-label="Image carousel — use the arrows or arrow keys"
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+        onPointerEnter={() => setPaused(true)}
+        onPointerLeave={() => {
+          setPaused(false);
+          drag.current.active = false;
+        }}
+      >
+        {/* Slides layer — taps/swipes land here (behind the controls). */}
+        <div
+          className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+        >
+          {prevIndex !== null && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={`exit-${animKey}`}
+              src={images[prevIndex].src}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-contain will-change-transform"
+              style={{ animation: `${exitAnim} ${FADE_MS}ms ${EASE} both` }}
+            />
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={`enter-${animKey}`}
+            src={images[index].src}
+            alt={images[index].alt}
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-contain will-change-transform"
+            style={{ animation: `${enterAnim} ${FADE_MS}ms ${EASE} both` }}
+          />
+        </div>
+
+        {/* Current view label */}
+        <div
+          key={`cap-${index}`}
+          className="pointer-events-none absolute bottom-4 left-4 z-20 rounded-full bg-black/60 px-3 py-1 text-xs font-medium tracking-wide text-white/80 backdrop-blur-sm"
+          style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
+        >
+          {images[index].caption}
+        </div>
+
+        {/* Slide counter */}
+        {count > 1 && (
+          <div className="pointer-events-none absolute right-4 top-4 z-20 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium tabular-nums text-white/70 backdrop-blur-sm">
+            {index + 1} / {count}
+          </div>
+        )}
+
+        {/* Prev / next arrows — appear on hover/focus (always shown on touch). */}
+        {count > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Previous image"
+              className="absolute left-3 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 opacity-70 backdrop-blur-md transition hover:bg-black/70 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-90 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+            >
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Next image"
+              className="absolute right-3 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 opacity-70 backdrop-blur-md transition hover:bg-black/70 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-90 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+            >
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Auto-advance progress bar (restarts each slide, pauses on hover). */}
+        {count > 1 && !reduced && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-white/5">
+            <div
+              key={`prog-${index}-${animKey}`}
+              className="h-full origin-left bg-white/70"
+              style={{
+                animation: `carouselProgress ${intervalMs}ms linear both`,
+                animationPlayState: paused ? 'paused' : 'running',
+              }}
+              onAnimationEnd={goNext}
+            />
+          </div>
+        )}
+
+        {/* Announce the active slide for assistive tech. */}
+        <span className="sr-only" aria-live="polite">
+          {`Image ${index + 1} of ${count}: ${images[index].caption}`}
+        </span>
+      </div>
+
+      {/* Dot indicators — click to jump straight to an image. */}
+      {count > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-2.5">
+          {images.map((img, i) => (
+            <button
+              key={img.src}
+              type="button"
+              onClick={() => go(i)}
+              aria-label={`Show ${img.caption.toLowerCase()}`}
+              aria-current={i === index}
+              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
+                i === index ? 'w-7 bg-white' : 'w-2.5 bg-white/30 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

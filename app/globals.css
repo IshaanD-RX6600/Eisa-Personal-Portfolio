@@ -14,3 +14,87 @@
     opacity: 0;
   }
 }
+
+/* ImageCarousel — directional slide + fade + zoom between slides. The incoming
+   slide drifts in from the travel direction while the outgoing one leaves the
+   opposite side, so forward and backward reads naturally (and wrap-around too). */
+@keyframes carouselEnterRight {
+  from {
+    opacity: 0;
+    transform: translateX(8%) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes carouselEnterLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-8%) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes carouselExitLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-8%) scale(0.98);
+  }
+}
+@keyframes carouselExitRight {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(8%) scale(0.98);
+  }
+}
+
+/* Reduced-motion fallbacks — opacity only, no travel or zoom. */
+@keyframes carouselFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes carouselFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Caption pill nudges up as each slide settles. */
+@keyframes carouselCaptionIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Auto-advance progress fill (restarts per slide). */
+@keyframes carouselProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
