@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -249,11 +250,12 @@ const PIN_SPOTS: PinSpot[] = [
 
 // Optional popup content per pin (keyed by label). Pins without an entry show a
 // blank body. Drop your photo at the image path to replace the placeholder.
-const PIN_CONTENT: Record<string, { image?: string; body?: string }> = {
-  'Healing Lodge': {
-    image: '/healing-lodge.jpg',
-    body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-  },
+const PIN_CONTENT: Record<string, { image?: string; body?: string }> = {};
+
+// Pins that navigate to a dedicated page on click instead of opening the popup.
+const PIN_ROUTES: Record<string, string> = {
+  'Healing Lodge': '/healing-lodge',
+  Toronto: '/toronto',
 };
 
 function makeLabel(text: string, pinHeight: number): THREE.Sprite {
@@ -287,8 +289,17 @@ export default function CanadaModel() {
   // handler via a ref bridge so the imperative scene can drive React state.
   const [selectedPin, setSelectedPin] = useState<number | null>(null);
   const onSelectRef = useRef<(i: number | null) => void>(() => {});
-  onSelectRef.current = setSelectedPin;
   const handleClose = useCallback(() => setSelectedPin(null), []);
+
+  // Router + select setter are kept in refs so the imperative Three.js click
+  // handler (wired once on mount) always reaches the current instances. Refs are
+  // updated in an effect rather than during render.
+  const router = useRouter();
+  const routerRef = useRef(router);
+  useEffect(() => {
+    onSelectRef.current = setSelectedPin;
+    routerRef.current = router;
+  }, [router]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -676,9 +687,19 @@ export default function CanadaModel() {
       const hits = pickMeshes.length
         ? raycaster.intersectObjects(pickMeshes, false)
         : [];
-      onSelectRef.current(
-        hits.length ? (hits[0].object.userData.pinIndex as number) : null,
-      );
+      const hitIndex = hits.length
+        ? (hits[0].object.userData.pinIndex as number)
+        : null;
+
+      // Pins with a route navigate to their page; the rest open the popup.
+      if (hitIndex !== null) {
+        const route = PIN_ROUTES[PIN_SPOTS[hitIndex].label];
+        if (route) {
+          routerRef.current.push(route);
+          return;
+        }
+      }
+      onSelectRef.current(hitIndex);
     };
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('click', onClick);
