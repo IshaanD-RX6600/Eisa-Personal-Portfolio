@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import NavMenu from "./components/NavMenu";
 
 export const metadata: Metadata = {
   title: "Eisa Siddiqui — Portfolio",
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+        <NavMenu />
         {children}
       </body>
     </html>

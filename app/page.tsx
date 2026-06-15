@@ -8,6 +8,9 @@ const EarthScene = dynamic(() => import('./components/EarthScene'), {
   ssr: false,
 });
 const Strands = dynamic(() => import('./components/Strands'), { ssr: false });
+const CanadaModel = dynamic(() => import('./components/CanadaModel'), {
+  ssr: false,
+});
 
 const CANADA: [number, number] = [56, -106];
 
@@ -25,55 +28,73 @@ export default function Home() {
   };
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-black">
-      {/* Animated shader background */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <Strands
-          colors={['#F97316', '#7C3AED', '#06B6D4']}
-          count={3}
-          speed={0.5}
-          amplitude={1}
-          waviness={1}
-          thickness={0.7}
-          glow={2.6}
-          taper={3}
-          spread={1}
-          intensity={0.6}
-          saturation={2}
-          opacity={1}
-          scale={1.5}
-        />
-      </div>
+    <main className="relative w-full bg-black">
+      {/* Section 1 — Topography map (landing) */}
+      <section className="min-h-screen w-full px-6 py-24 sm:px-10">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+            Topography Map
+          </h1>
+          <p className="mt-3 text-sm text-white/60 sm:text-base">
+            A 3D topographic model of Canada.
+          </p>
+          <div className="mt-10">
+            <CanadaModel />
+          </div>
+        </div>
+      </section>
 
-      {/* Spinning globe (transparent canvas sits over the background) */}
-      <div className="pointer-events-none absolute inset-0 z-10">
-        <EarthScene focusRegion={focusRegion} resetSignal={resetSignal} />
-      </div>
+      {/* Section 2 — Spinning globe */}
+      <section className="relative h-screen w-full overflow-hidden">
+        {/* Animated shader background */}
+        <div className="pointer-events-none absolute inset-0 z-0">
+          <Strands
+            colors={['#F97316', '#7C3AED', '#06B6D4']}
+            count={3}
+            speed={0.5}
+            amplitude={1}
+            waviness={1}
+            thickness={0.7}
+            glow={2.6}
+            taper={3}
+            spread={1}
+            intensity={0.6}
+            saturation={2}
+            opacity={1}
+            scale={1.5}
+          />
+        </div>
 
-      {/* Foreground UI */}
-      <header className="pointer-events-none absolute inset-x-0 top-10 z-20 flex flex-col items-center text-center text-white">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
-          Eisa Siddiqui
-        </h1>
-        <p className="mt-2 text-sm text-white/60 sm:text-base">Portfolio</p>
-      </header>
+        {/* Spinning globe (transparent canvas sits over the background) */}
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <EarthScene focusRegion={focusRegion} resetSignal={resetSignal} />
+        </div>
 
-      <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3">
-        {focusRegion && (
+        {/* Foreground UI */}
+        <header className="pointer-events-none absolute inset-x-0 top-10 z-20 flex flex-col items-center text-center text-white">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
+            Eisa Siddiqui
+          </h1>
+          <p className="mt-2 text-sm text-white/60 sm:text-base">Portfolio</p>
+        </header>
+
+        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3">
+          {focusRegion && (
+            <button
+              onClick={reset}
+              className="rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            >
+              Reset
+            </button>
+          )}
           <button
-            onClick={reset}
+            onClick={startPresentation}
             className="rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           >
-            Reset
+            Start presentation
           </button>
-        )}
-        <button
-          onClick={startPresentation}
-          className="rounded-full bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        >
-          Start presentation
-        </button>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
