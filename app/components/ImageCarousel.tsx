@@ -7,6 +7,7 @@ export interface CarouselImage {
   alt: string;
   caption: string;
   reference?: string;
+  description?: string;
 }
 
 interface ImageCarouselProps {
@@ -43,7 +44,6 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
   const [prevIndex, setPrevIndex] = useState<number | null>(null); // exiting slide
   const [direction, setDirection] = useState(1); //                 1 fwd, -1 back
   const [animKey, setAnimKey] = useState(0); //                     retriggers anims
-  const [showReferences, setShowReferences] = useState(false); //    references modal
 
   // Current index mirrored to a ref so the imperative pointer/keyboard handlers
   // always read the latest value without re-binding.
@@ -135,19 +135,22 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
 
   return (
     <div>
-      {/* Stage */}
-      <div
-        className="group relative mt-10 aspect-[16/9] w-full select-none overflow-hidden rounded-2xl ring-1 ring-white/10"
-        style={{ background: INNER_BG }}
-        role="group"
-        aria-roledescription="carousel"
-        aria-label="Image carousel — use the arrows or arrow keys"
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onPointerLeave={() => {
-          drag.current.active = false;
-        }}
-      >
+      {/* Main carousel + description container */}
+      <div className="flex flex-col lg:flex-row gap-6 mt-10 lg:min-h-96">
+        {/* Carousel */}
+        <div className="w-full lg:w-2/3">
+          <div
+            className="group relative aspect-[16/9] w-full select-none overflow-hidden rounded-2xl ring-1 ring-white/10"
+            style={{ background: INNER_BG }}
+            role="group"
+            aria-roledescription="carousel"
+            aria-label="Image carousel — use the arrows or arrow keys"
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+            onPointerLeave={() => {
+              drag.current.active = false;
+            }}
+          >
         {/* Slides layer — taps/swipes land here (behind the controls). */}
         <div
           className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing"
@@ -223,81 +226,38 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
         <span className="sr-only" aria-live="polite">
           {`Image ${index + 1} of ${count}: ${images[index].caption}`}
         </span>
-      </div>
-
-      {/* Dot indicators — click to jump straight to an image. */}
-      {count > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2.5">
-          {images.map((img, i) => (
-            <button
-              key={img.src}
-              type="button"
-              onClick={() => go(i)}
-              aria-label={`Show ${img.caption.toLowerCase()}`}
-              aria-current={i === index}
-              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
-                i === index ? 'w-7 bg-white' : 'w-2.5 bg-white/30 hover:bg-white/60'
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* References button — always visible */}
-      <div className="mt-6 flex items-center justify-center">
-        <button
-          type="button"
-          onClick={() => setShowReferences(true)}
-          className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-        >
-          View References
-        </button>
-      </div>
-
-      {/* References Modal */}
-      {showReferences && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          onClick={() => setShowReferences(false)}
-        >
-          <div
-            className="max-h-96 w-full max-w-2xl overflow-y-auto rounded-2xl bg-black p-6 ring-1 ring-white/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Image References</h2>
-              <button
-                type="button"
-                onClick={() => setShowReferences(false)}
-                aria-label="Close"
-                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M12 4L4 12M4 4l8 8"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-4">
-              {images.map((img, i) => (
-                <div key={img.src} className="border-l-2 border-white/20 pl-4">
-                  <p className="text-sm font-medium text-white">{img.caption}</p>
-                  {img.reference ? (
-                    <p className="mt-1 text-sm text-white/60">{img.reference}</p>
-                  ) : (
-                    <p className="mt-1 text-sm text-white/40 italic">No reference provided</p>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Description panel — appears on the right only for the third slide */}
+        {images[index].description && index === 2 && (
+          <div
+            key={`desc-${index}`}
+            className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-white/5 backdrop-blur-sm p-6 ring-1 ring-white/10"
+            style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
+          >
+            <p className="text-sm leading-relaxed text-white/80">{images[index].description}</p>
+          </div>
+        )}
+      </div>
+
+    {/* Dot indicators — click to jump straight to an image */}
+    {count > 1 && (
+      <div className="mt-6 flex items-center justify-center gap-2.5">
+        {images.map((img, i) => (
+          <button
+            key={img.src}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Show ${img.caption.toLowerCase()}`}
+            aria-current={i === index}
+            className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
+              i === index ? 'w-7 bg-white' : 'w-2.5 bg-white/30 hover:bg-white/60'
+            }`}
+          />
+        ))}
+      </div>
+    )}
+  </div>
   );
 }
