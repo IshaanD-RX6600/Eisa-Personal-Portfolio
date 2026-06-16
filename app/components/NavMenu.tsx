@@ -4,10 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/topography', label: 'Topography Map' },
-];
+const LINKS = [{ href: '/', label: 'Home' }];
 
 // Fixed hamburger button (top-left) that opens a full-screen navigation overlay.
 export default function NavMenu() {

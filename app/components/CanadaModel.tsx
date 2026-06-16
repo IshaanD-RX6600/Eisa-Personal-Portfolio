@@ -255,6 +255,7 @@ const PIN_CONTENT: Record<string, { image?: string; body?: string }> = {};
 // Pins that navigate to a dedicated page on click instead of opening the popup.
 const PIN_ROUTES: Record<string, string> = {
   'Healing Lodge': '/healing-lodge',
+  Ottawa: '/ottawa',
   Toronto: '/toronto',
   Whistler: '/whistler',
 };

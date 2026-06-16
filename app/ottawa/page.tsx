@@ -3,27 +3,27 @@
 import Link from 'next/link';
 import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 
-// Views of Nathan Phillips Square. Filenames have no spaces, so they're used
+// Three views around Ottawa. Filenames have no spaces, so they're used
 // as-is for the <img> src.
 const IMAGES: CarouselImage[] = [
   {
-    src: '/NaathanFILLIPSSQUARe.png',
-    alt: 'The TORONTO sign and painted canoe sculpture at Nathan Phillips Square',
-    caption: 'TORONTO sign',
+    src: '/RESIDNETAILSCHOo.png',
+    alt: 'Towering carved eagle sculpture above a residential school memorial installation',
+    caption: 'Residential school memorial',
   },
   {
-    src: '/NATANFILiP.png',
-    alt: 'Carved stone turtle sculpture at Nathan Phillips Square',
-    caption: 'Turtle sculpture',
+    src: '/MONUMNET.png',
+    alt: 'Circular Indigenous beadwork-style flowerbed in a memorial garden',
+    caption: 'Memorial garden',
   },
   {
-    src: '/ILOVENATAN.png',
-    alt: 'Aerial view of Nathan Phillips Square and Toronto City Hall',
-    caption: 'Aerial view',
+    src: '/nigmonet.png',
+    alt: 'The Gothic Revival West Block on Parliament Hill in Ottawa',
+    caption: 'Parliament Hill',
   },
 ];
 
-export default function TorontoPage() {
+export default function OttawaPage() {
   return (
     <main className="min-h-screen w-full bg-black px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-5xl">
@@ -35,10 +35,10 @@ export default function TorontoPage() {
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-          Nathan Phillips Square
+          Ottawa, ON
         </h1>
         <p className="mt-3 text-sm text-white/60 sm:text-base">
-          Three views of the square — click, swipe, or use the arrows to explore.
+          Three views around Ottawa — click, swipe, or use the arrows to explore.
         </p>
 
         <ImageCarousel images={IMAGES} />

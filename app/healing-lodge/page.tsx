@@ -28,7 +28,7 @@ export default function HealingLodgePage() {
     <main className="min-h-screen w-full bg-black px-6 py-24 sm:px-10">
       <div className="mx-auto max-w-5xl">
         <Link
-          href="/topography"
+          href="/"
           className="inline-flex items-center gap-2 text-sm text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
           <span aria-hidden="true">←</span> Back to map
