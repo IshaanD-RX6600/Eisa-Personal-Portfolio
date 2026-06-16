@@ -256,6 +256,7 @@ const PIN_CONTENT: Record<string, { image?: string; body?: string }> = {};
 const PIN_ROUTES: Record<string, string> = {
   'Healing Lodge': '/healing-lodge',
   Toronto: '/toronto',
+  Whistler: '/whistler',
 };
 
 function makeLabel(text: string, pinHeight: number): THREE.Sprite {
