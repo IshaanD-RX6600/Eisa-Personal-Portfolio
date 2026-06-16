@@ -10,8 +10,6 @@ export interface CarouselImage {
 
 interface ImageCarouselProps {
   images: CarouselImage[];
-  /** Time each image is held before auto-advancing. */
-  intervalMs?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,7 +18,6 @@ interface ImageCarouselProps {
 const FADE_MS = 650; //   slide enter/exit length
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'; // soft, settled overshoot-free
 const INNER_BG = '#0b0f17';
-const DEFAULT_INTERVAL_MS = 5000;
 const SWIPE_THRESHOLD = 40; // px of horizontal travel to register a swipe
 const TAP_SLOP = 6; //        movement under this counts as a tap (advance)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,10 +34,7 @@ function usePrefersReducedMotion(): boolean {
   return reduced;
 }
 
-export default function ImageCarousel({
-  images,
-  intervalMs = DEFAULT_INTERVAL_MS,
-}: ImageCarouselProps) {
+export default function ImageCarousel({ images }: ImageCarouselProps) {
   const count = images.length;
   const reduced = usePrefersReducedMotion();
 
@@ -48,7 +42,6 @@ export default function ImageCarousel({
   const [prevIndex, setPrevIndex] = useState<number | null>(null); // exiting slide
   const [direction, setDirection] = useState(1); //                 1 fwd, -1 back
   const [animKey, setAnimKey] = useState(0); //                     retriggers anims
-  const [paused, setPaused] = useState(false);
 
   // Current index mirrored to a ref so the imperative pointer/keyboard handlers
   // always read the latest value without re-binding.
@@ -85,15 +78,6 @@ export default function ImageCarousel({
     const t = window.setTimeout(() => setPrevIndex(null), FADE_MS);
     return () => window.clearTimeout(t);
   }, [animKey, prevIndex]);
-
-  // Auto-advance. With motion allowed, the progress bar's animationend drives the
-  // step, so the bar and the timing stay in lockstep (including hover-pause).
-  // Reduced motion has no bar, so fall back to a plain interval.
-  useEffect(() => {
-    if (!reduced || paused || count <= 1) return;
-    const id = window.setInterval(goNext, intervalMs);
-    return () => window.clearInterval(id);
-  }, [reduced, paused, count, intervalMs, goNext, animKey]);
 
   // Keyboard: ← / → step, Home / End jump to the ends.
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -158,9 +142,7 @@ export default function ImageCarousel({
         aria-label="Image carousel — use the arrows or arrow keys"
         tabIndex={0}
         onKeyDown={onKeyDown}
-        onPointerEnter={() => setPaused(true)}
         onPointerLeave={() => {
-          setPaused(false);
           drag.current.active = false;
         }}
       >
@@ -233,21 +215,6 @@ export default function ImageCarousel({
               </svg>
             </button>
           </>
-        )}
-
-        {/* Auto-advance progress bar (restarts each slide, pauses on hover). */}
-        {count > 1 && !reduced && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-white/5">
-            <div
-              key={`prog-${index}-${animKey}`}
-              className="h-full origin-left bg-white/70"
-              style={{
-                animation: `carouselProgress ${intervalMs}ms linear both`,
-                animationPlayState: paused ? 'paused' : 'running',
-              }}
-              onAnimationEnd={goNext}
-            />
-          </div>
         )}
 
         {/* Announce the active slide for assistive tech. */}
