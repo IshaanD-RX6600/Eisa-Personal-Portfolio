@@ -24,6 +24,11 @@ const SWIPE_THRESHOLD = 40; // px of horizontal travel to register a swipe
 const TAP_SLOP = 6; //        movement under this counts as a tap (advance)
 // ─────────────────────────────────────────────────────────────────────────────
 
+// http(s) references can be linked as the image's source.
+function isUrl(ref: string): boolean {
+  return /^https?:\/\//i.test(ref.trim());
+}
+
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -39,6 +44,9 @@ function usePrefersReducedMotion(): boolean {
 export default function ImageCarousel({ images }: ImageCarouselProps) {
   const count = images.length;
   const reduced = usePrefersReducedMotion();
+  // When no slide carries a description, the carousel takes the full width
+  // instead of leaving a gap where the side panel would sit.
+  const hasDescriptions = images.some((img) => img.description);
 
   const [index, setIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null); // exiting slide
@@ -138,7 +146,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
       {/* Main carousel + description container */}
       <div className="flex flex-col lg:flex-row gap-6 mt-10 lg:min-h-96">
         {/* Carousel */}
-        <div className="w-full lg:w-2/3">
+        <div className={`w-full ${hasDescriptions ? 'lg:w-2/3' : ''}`}>
           <div
             className="group relative aspect-[16/9] w-full select-none overflow-hidden rounded-2xl ring-1 ring-white/10"
             style={{ background: INNER_BG }}
@@ -233,10 +241,29 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
         {images[index].description && (
           <div
             key={`desc-${index}`}
-            className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-white/5 backdrop-blur-sm p-6 ring-1 ring-white/10"
+            className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-[var(--surface)] p-6 ring-1 ring-white/10"
             style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
           >
             <p className="text-base leading-relaxed text-white/80">{images[index].description}</p>
+            {images[index].reference && isUrl(images[index].reference!) && (
+              <a
+                href={images[index].reference}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-[var(--accent-2)] transition hover:text-[var(--accent-soft)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              >
+                Source
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M6 3h7v7M13 3L6.5 9.5M11 9.5V13H3V5h3.5"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
+            )}
           </div>
         )}
       </div>
@@ -251,8 +278,8 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             onClick={() => go(i)}
             aria-label={`Show ${img.caption.toLowerCase()}`}
             aria-current={i === index}
-            className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
-              i === index ? 'w-7 bg-white' : 'w-2.5 bg-white/30 hover:bg-white/60'
+            className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+              i === index ? 'w-7 bg-[var(--accent)]' : 'w-2.5 bg-white/30 hover:bg-white/60'
             }`}
           />
         ))}

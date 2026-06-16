@@ -1,103 +1,70 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
+import ReferencesModal from '../components/ReferencesModal';
 
-// Views of Nathan Phillips Square. Filenames have no spaces, so they're used
+const TITLE = 'Toronto Spirit Garden';
+const HINT = 'Click the arrows, dots, or swipe to explore each view.';
+
+// Views of the Toronto Spirit Garden. Filenames have no spaces, so they're used
 // as-is for the <img> src.
+const DESCRIPTION_1 = `The Spirit Garden occupies one of the most visible locations in Toronto, directly beside City Hall and Nathan Phillips Square. This location was chosen intentionally because reconciliation cannot happen if Indigenous histories remain hidden. Built in response to Truth and Reconciliation Call to Action #82, the garden creates a permanent Indigenous presence in one of Canada's busiest public spaces. Rather than placing Indigenous history inside a museum, the design brings it into the everyday lives of millions of visitors. This demonstrates how architecture can contribute to reconciliation by making Indigenous experiences visible, encouraging public learning, and creating a shared space for reflection and understanding.`;
+
+const DESCRIPTION_2 = `The Spirit Canoe recognizes the importance of travel, trade, and connection within Indigenous cultures. For generations, canoes linked communities across the land long before modern cities existed. By placing an Indigenous canoe within Toronto's civic centre, the Spirit Garden reminds visitors that Indigenous histories did not begin with colonization. The canoe helps challenge the misconception that Indigenous cultures belong only to the past. Instead, it presents Indigenous knowledge and traditions as living parts of Canada today. Architecture contributes to reconciliation when public spaces tell a more complete story of the land and the people connected to it.`;
+
+const DESCRIPTION_3 = `At the centre of the Spirit Garden stands a limestone turtle sculpture created by Anishinaabe artist Solomon King. The turtle represents Turtle Island, a name many Indigenous peoples use for North America, and symbolizes the connection between people, land, and creation. The sculpture also honours survivors of residential schools and the children who never returned home. Positioned at the heart of the garden, the turtle serves as a reminder that reconciliation begins with acknowledging difficult truths. This reflects how Indigenous architecture differs from many traditional monuments: rather than celebrating power or conquest, it emphasizes memory, healing, and relationships. Through design, the Spirit Garden transforms public space into a place of learning and reconciliation.`;
+
 const IMAGES: CarouselImage[] = [
   {
     src: '/ILOVENATAN.png',
-    alt: 'Aerial view of Nathan Phillips Square and Toronto City Hall',
+    alt: 'Aerial view of the Toronto Spirit Garden and City Hall',
     caption: 'Aerial view',
     reference: 'Google Earth',
+    description: DESCRIPTION_1,
   },
   {
     src: '/NaathanFILLIPSSQUARe.png',
-    alt: 'The TORONTO sign and painted canoe sculpture at Nathan Phillips Square',
-    caption: 'TORONTO sign',
+    alt: 'The TORONTO sign and painted canoe sculpture at the Spirit Garden',
+    caption: 'Spirit Canoe',
     reference: 'https://devp.org/en/toronto-spirit-garden/',
+    description: DESCRIPTION_2,
   },
   {
     src: '/NATANFILiP.png',
-    alt: 'Carved stone turtle sculpture at Nathan Phillips Square',
+    alt: 'Carved limestone turtle sculpture at the Toronto Spirit Garden',
     caption: 'Turtle sculpture',
-    reference: 'https://www.cbc.ca/news/canada/toronto/indigenous-spirit-garden-toronto-residential-school-survivors-cultural-space-1.7337072',
+    reference:
+      'https://www.cbc.ca/news/canada/toronto/indigenous-spirit-garden-toronto-residential-school-survivors-cultural-space-1.7337072',
+    description: DESCRIPTION_3,
   },
 ];
 
 export default function TorontoPage() {
-  const [showReferences, setShowReferences] = useState(false);
-
   return (
-    <main className="relative min-h-screen w-full bg-black px-6 py-24 sm:px-10">
-      {/* References button — top right of page */}
-      <button
-        type="button"
-        onClick={() => setShowReferences(true)}
-        className="fixed top-6 right-6 z-40 rounded-lg border border-white/20 bg-black/50 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-black/70 hover:text-white hover:border-white/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-      >
-        View References
-      </button>
-
-      {/* References Modal */}
-      {showReferences && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          onClick={() => setShowReferences(false)}
-        >
-          <div
-            className="max-h-96 w-full max-w-2xl overflow-y-auto rounded-2xl bg-black p-6 ring-1 ring-white/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Image References</h2>
-              <button
-                type="button"
-                onClick={() => setShowReferences(false)}
-                aria-label="Close"
-                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M12 4L4 12M4 4l8 8"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-4">
-              {IMAGES.map((img) => (
-                <div key={img.src} className="border-l-2 border-white/20 pl-4">
-                  <p className="text-sm font-medium text-white">{img.caption}</p>
-                  {img.reference ? (
-                    <p className="mt-1 text-sm text-white/60">{img.reference}</p>
-                  ) : (
-                    <p className="mt-1 text-sm text-white/40 italic">No reference provided</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+    <main className="relative min-h-screen w-full px-6 py-24 sm:px-10">
+      <ReferencesModal images={IMAGES} />
 
       <div className="w-full">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group inline-flex items-center gap-2 text-sm text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
-          <span aria-hidden="true">←</span> Back to map
+          <span aria-hidden="true" className="transition-transform group-hover:-translate-x-0.5">
+            ←
+          </span>{' '}
+          Back to map
         </Link>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-          Nathan Phillips Square
+        <h1 className="animate-fade-up mt-6 bg-gradient-to-br from-white via-white to-white/55 bg-clip-text text-3xl font-semibold tracking-tight text-transparent sm:text-5xl">
+          {TITLE}
         </h1>
-
+        <p
+          className="animate-fade-up mt-3 max-w-2xl text-sm text-white/50 sm:text-base"
+          style={{ animationDelay: '90ms' }}
+        >
+          {HINT}
+        </p>
 
         <ImageCarousel images={IMAGES} />
       </div>

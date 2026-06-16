@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavMenu from "./components/NavMenu";
+import IntroExperience from "./components/IntroExperience";
 
 export const metadata: Metadata = {
   title: "Eisa's Portfolio",
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
+        <IntroExperience />
         <NavMenu />
         {children}
       </body>

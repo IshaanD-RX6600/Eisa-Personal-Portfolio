@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
+import ReferencesModal from '../components/ReferencesModal';
+
+const TITLE = "Squamish Lil'wat Cultural Centre";
+const HINT = 'Click the arrows, dots, or swipe to explore each view.';
 
 // Three views around Whistler, BC. Filenames have no spaces, so they're used
 // as-is for the <img> src.
@@ -28,76 +31,30 @@ const IMAGES: CarouselImage[] = [
 ];
 
 export default function WhistlerPage() {
-  const [showReferences, setShowReferences] = useState(false);
-
   return (
-    <main className="relative min-h-screen w-full bg-black px-6 py-24 sm:px-10">
-      {/* References button — top right of page */}
-      <button
-        type="button"
-        onClick={() => setShowReferences(true)}
-        className="fixed top-6 right-6 z-40 rounded-lg border border-white/20 bg-black/50 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-black/70 hover:text-white hover:border-white/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-      >
-        View References
-      </button>
-
-      {/* References Modal */}
-      {showReferences && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-          onClick={() => setShowReferences(false)}
-        >
-          <div
-            className="max-h-96 w-full max-w-2xl overflow-y-auto rounded-2xl bg-black p-6 ring-1 ring-white/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Image References</h2>
-              <button
-                type="button"
-                onClick={() => setShowReferences(false)}
-                aria-label="Close"
-                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              >
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M12 4L4 12M4 4l8 8"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-4">
-              {IMAGES.map((img) => (
-                <div key={img.src} className="border-l-2 border-white/20 pl-4">
-                  <p className="text-sm font-medium text-white">{img.caption}</p>
-                  {img.reference ? (
-                    <p className="mt-1 text-sm text-white/60">{img.reference}</p>
-                  ) : (
-                    <p className="mt-1 text-sm text-white/40 italic">No reference provided</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+    <main className="relative min-h-screen w-full px-6 py-24 sm:px-10">
+      <ReferencesModal images={IMAGES} />
 
       <div className="w-full">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          className="group inline-flex items-center gap-2 text-sm text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
         >
-          <span aria-hidden="true">←</span> Back to map
+          <span aria-hidden="true" className="transition-transform group-hover:-translate-x-0.5">
+            ←
+          </span>{' '}
+          Back to map
         </Link>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-            Squamish Lil'wat Cultural Centre
+        <h1 className="animate-fade-up mt-6 bg-gradient-to-br from-white via-white to-white/55 bg-clip-text text-3xl font-semibold tracking-tight text-transparent sm:text-5xl">
+          {TITLE}
         </h1>
-
+        <p
+          className="animate-fade-up mt-3 max-w-2xl text-sm text-white/50 sm:text-base"
+          style={{ animationDelay: '90ms' }}
+        >
+          {HINT}
+        </p>
 
         <ImageCarousel images={IMAGES} />
       </div>
