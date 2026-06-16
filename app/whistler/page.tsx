@@ -6,24 +6,24 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 
 // Three views around Whistler, BC. Filenames have no spaces, so they're used
 // as-is for the <img> src.
+const DESCRIPTION_1 = `From above, the Squamish Lil'wat Cultural Centre appears to emerge from the surrounding forest rather than dominate it. The building was intentionally designed to reflect Indigenous values that emphasize respect for the land and the interconnected relationship between people and nature. Rather than forcing the landscape to adapt to the building, the design works with its natural surroundings. This contributes to reconciliation because it demonstrates that Indigenous approaches to architecture offer valuable alternatives to conventional development practices. By recognizing Indigenous relationships with the land, the Cultural Centre helps challenge colonial ideas that viewed land primarily as a resource to be controlled and exploited.`;
+
+const DESCRIPTION_2 = `The Cultural Centre was designed using architectural forms inspired by traditional Squamish and Lil'wat structures while incorporating modern materials and construction techniques. This demonstrates that Indigenous architecture is not confined to the past but continues to evolve and remain relevant today. Reconciliation requires more than acknowledging Indigenous history; it requires respecting Indigenous knowledge in the present. By creating a modern public building rooted in Indigenous worldviews, the Cultural Centre shows how architecture can bridge Indigenous traditions and contemporary Canadian society. The building itself becomes evidence that Indigenous perspectives deserve a meaningful place in the future of Canadian communities.`;
+
 const IMAGES: CarouselImage[] = [
   {
     src: '/WhistlerBC.png',
     alt: 'View of Whistler, BC',
     caption: 'Whistler view',
     reference: 'Google Earth',
+    description: DESCRIPTION_1,
   },
   {
     src: '/BCWHISTLER.png',
     alt: 'Aerial view of a timber lodge among the forested mountains of Whistler, BC',
     caption: 'Mountain lodge',
     reference: 'https://slcc.ca',
-  },
-  {
-    src: '/INDIGENOUSMUSEAMBC.png',
-    alt: 'Carved totem poles outside the Squamish Lil\'wat Cultural Centre',
-    caption: 'Cultural centre',
-    reference: 'https://www.whistler.com/blog/post/squamish-lilwat-cultural-centre/',
+    description: DESCRIPTION_2,
   },
 ];
 
