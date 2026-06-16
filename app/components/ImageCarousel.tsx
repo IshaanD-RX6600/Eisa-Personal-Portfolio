@@ -236,7 +236,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-white/5 backdrop-blur-sm p-6 ring-1 ring-white/10"
             style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
           >
-            <p className="text-sm leading-relaxed text-white/80">{images[index].description}</p>
+            <p className="text-base leading-relaxed text-white/80">{images[index].description}</p>
           </div>
         )}
       </div>
