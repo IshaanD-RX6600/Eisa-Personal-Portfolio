@@ -3,7 +3,7 @@ import "./globals.css";
 import NavMenu from "./components/NavMenu";
 
 export const metadata: Metadata = {
-  title: "Eisa Siddiqui — Portfolio",
+  title: "Building Reconciliation",
   description: "Personal portfolio of Eisa Siddiqui",
 };
 
