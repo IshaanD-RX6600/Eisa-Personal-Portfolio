@@ -14,11 +14,8 @@ export default function Home() {
       <section className="min-h-screen w-full px-6 py-24 sm:px-10">
         <div className="mx-auto max-w-7xl">
           <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-            Map of Canada
+              Building Reconciliation
           </h1>
-          <p className="mt-3 text-sm text-white/60 sm:text-base">
-            A 3D model of Canada.
-          </p>
           <div className="mt-10">
             <CanadaModel />
           </div>
