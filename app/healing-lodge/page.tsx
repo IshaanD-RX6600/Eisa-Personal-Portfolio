@@ -10,6 +10,8 @@ const FIRST_IMAGE_DESCRIPTION = `From above, Okimaw Ohci looks nothing like a pr
 
 const DESCRIPTION = `A regular prison is organized around control  its centre is a guard station and its logic is containment. Okimaw Ohci is organized around the opposite. At its centre is the Spiritual Lodge, where Elders lead teachings and ceremonies, and the whole site sits inside the forest instead of behind a wall. The women here are not called inmates; they are residents, and they are not kept behind bars. This matters for reconciliation because Canada's justice system has harmed Indigenous communities for generations and broken trust between Indigenous and non-Indigenous people. A building that chooses healing over punishment begins to rebuild that trust — it shows that Indigenous approaches to justice are valued, not dismissed. Architecture becomes the place where reconciliation stops being a word and turns into something a person actually lives.`;
 
+const THIRD_IMAGE_DESCRIPTION = `Culture is everywhere: drums, hides, and Indigenous art are part of daily life, not artifacts locked in a glass case. For Indigenous women who have spent their lives inside systems built to erase them, walking into a space that reflects their own traditions says: you are seen, you belong here, your identity matters. And for non-Indigenous Canadians, a space like this teaches that Indigenous ways of healing have real value. That mutual recognition Indigenous people feeling they belong, and non-Indigenous people learning to respect why is exactly what repairing a relationship looks like. This is what Truth and Reconciliation Call to Action #35 asks Canada to build more of. But more than 25 years after Okimaw Ohci opened, there are still only a handful of healing lodges in the entire country, and Indigenous organizations say access is far too limited. The design proves architecture can help reconciliation the shortage proves how far Canada still has to go.`;
+
 const IMAGES: CarouselImage[] = [
   {
     src: '/Screenshot%202026-06-15%20012104.png',
@@ -23,13 +25,14 @@ const IMAGES: CarouselImage[] = [
     alt: 'Ground-level view of the Okimaw Ohci Healing Lodge',
     caption: 'Ground-level view',
     reference: 'https://salvationist.ca/articles/2016/02/okimaw-ohci-healing-lodge-salvation-army/',
+    description: DESCRIPTION,
   },
   {
     src: '/HEALINGLODGEEEEEEEEEEE.png',
     alt: 'View of the Okimaw Ohci Healing Lodge',
     caption: 'Lodge view',
     reference: 'https://globalnews.ca/news/10439439/indigenous-healing-lodges-face-chronic-underfunding-across-canada-critics-say/',
-    description: DESCRIPTION,
+    description: THIRD_IMAGE_DESCRIPTION,
   },
 ];
 
