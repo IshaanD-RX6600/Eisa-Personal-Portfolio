@@ -38,7 +38,7 @@ export default function HealingLodgePage() {
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-          Okimaw Ohci 
+          Okimaw Ohci Healing Lodge
         </h1>
 
 
