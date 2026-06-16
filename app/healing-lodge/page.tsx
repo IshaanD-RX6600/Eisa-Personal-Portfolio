@@ -35,10 +35,10 @@ export default function HealingLodgePage() {
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-          Okimaw Ohci Healing Lodge
+          Okimaw Ohci
         </h1>
         <p className="mt-3 text-sm text-white/60 sm:text-base">
-          Three views of the lodge — click, swipe, or use the arrows to explore.
+          Saskatchewan Okimaw Ohci
         </p>
 
         <ImageCarousel images={IMAGES} />

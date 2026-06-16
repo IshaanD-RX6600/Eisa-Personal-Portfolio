@@ -245,7 +245,7 @@ const PIN_SPOTS: PinSpot[] = [
   { lat: 50.1163, lon: -122.9574, label: 'Whistler' },
   { lat: 45.4215, lon: -75.6972, label: 'Ottawa' },
   { lat: 43.6532, lon: -79.3832, label: 'Toronto' },
-  { lat: 57.5, lon: -105.5, label: 'Healing Lodge' }, // northern Saskatchewan (approx.)
+  { lat: 57.5, lon: -105.5, label: 'Saskatchewan' }, // northern Saskatchewan (approx.)
 ];
 
 // Optional popup content per pin (keyed by label). Pins without an entry show a
@@ -254,7 +254,7 @@ const PIN_CONTENT: Record<string, { image?: string; body?: string }> = {};
 
 // Pins that navigate to a dedicated page on click instead of opening the popup.
 const PIN_ROUTES: Record<string, string> = {
-  'Healing Lodge': '/healing-lodge',
+  'Saskatchewan': '/healing-lodge',
   Ottawa: '/ottawa',
   Toronto: '/toronto',
   Whistler: '/whistler',
