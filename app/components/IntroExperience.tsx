@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import IntroStage from './IntroStage';
 import { loadModel } from '../lib/loadModel';
 
-const SEEN_KEY = 'eisa-intro-seen';
 const SOCCER = '/soccer_ball.glb';
 const CRADLE = '/newtons_cradle.glb';
 const SUPRA = '/toyota_supra.glb';
@@ -30,7 +29,7 @@ const SCENES: Scene[] = [
     model: SOCCER,
     eyebrow: 'Favourite sport',
     title: 'Soccer',
-    lines: ['Position — Goalkeeper.', 'The last line of defence.'],
+    lines: ['Position: Goalkeeper.', 'The last line of defence.'],
   },
   {
     key: 'physics',
@@ -61,28 +60,16 @@ function usePrefersReducedMotion(): boolean {
 }
 
 // Full-screen "gate" that introduces Eisa with 3D props before revealing the
-// site. Shown once per browser session (sessionStorage), skippable, and
-// keyboard / reduced-motion friendly.
+// site. Plays on every full page load / refresh (it stays mounted across
+// client-side navigations, so it doesn't replay when moving between pages).
+// Skippable, keyboard- and reduced-motion-friendly.
 export default function IntroExperience() {
   const reduced = usePrefersReducedMotion();
-  const [checked, setChecked] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [leaving, setLeaving] = useState(false);
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [ready, setReady] = useState<Record<string, boolean>>({});
-
-  // Gate: only show if this session hasn't seen it.
-  useEffect(() => {
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(SEEN_KEY) === '1';
-    } catch {
-      // sessionStorage unavailable → just show it.
-    }
-    setVisible(!seen);
-    setChecked(true);
-  }, []);
 
   // Preload both models (with progress) as soon as the gate is up, so the heavy
   // Supra is ready by the time the viewer clicks through to it.
@@ -108,11 +95,6 @@ export default function IntroExperience() {
   }, [visible]);
 
   const finish = useCallback(() => {
-    try {
-      sessionStorage.setItem(SEEN_KEY, '1');
-    } catch {
-      // ignore
-    }
     setLeaving(true);
     window.setTimeout(() => setVisible(false), reduced ? 0 : 550);
   }, [reduced]);
@@ -148,7 +130,7 @@ export default function IntroExperience() {
     return () => window.removeEventListener('keydown', onKey);
   }, [visible, next, back, finish]);
 
-  if (!checked || !visible) return null;
+  if (!visible) return null;
 
   const scene = SCENES[index];
   const isLast = index === SCENES.length - 1;
