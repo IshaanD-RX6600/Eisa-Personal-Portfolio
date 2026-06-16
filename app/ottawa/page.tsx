@@ -35,11 +35,9 @@ export default function OttawaPage() {
         </Link>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-          Ottawa, ON
+          Ottawa residential school monument
         </h1>
-        <p className="mt-3 text-sm text-white/60 sm:text-base">
-          Three views around Ottawa — click, swipe, or use the arrows to explore.
-        </p>
+
 
         <ImageCarousel images={IMAGES} />
       </div>

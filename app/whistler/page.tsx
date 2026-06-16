@@ -37,9 +37,7 @@ export default function WhistlerPage() {
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
             Squamish Lil'wat Cultural Centre
         </h1>
-        <p className="mt-3 text-sm text-white/60 sm:text-base">
-          Three views around Whistler — click, swipe, or use the arrows to explore.
-        </p>
+
 
         <ImageCarousel images={IMAGES} />
       </div>
