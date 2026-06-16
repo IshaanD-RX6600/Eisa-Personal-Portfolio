@@ -6,24 +6,24 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 
 // Three views around Ottawa. Filenames have no spaces, so they're used
 // as-is for the <img> src.
+const DESCRIPTION_1 = `The location of the Residential Schools National Monument is as important as the monument itself. It is being built beside Parliament Hill, one of the most significant political spaces in Canada. For generations, decisions made by governments contributed to the residential school system and its devastating impacts on Indigenous communities. By placing the monument at the centre of the nation's capital, Indigenous history can no longer be ignored or pushed to the margins. This directly connects to TRC Call to Action #81, which calls for the creation of a Residential Schools National Monument in Ottawa. The monument demonstrates how architecture and public space can contribute to reconciliation by ensuring Indigenous experiences are visibly represented in places of national importance.`;
+
+const DESCRIPTION_2 = `This monument incorporates Indigenous artistic traditions and symbolism into its design, allowing Indigenous voices to shape how the story of residential schools is remembered. Rather than having governments tell Indigenous stories on their behalf, Indigenous artists and survivors have played an important role in the monument's development. This contributes to reconciliation because it creates a space where Indigenous perspectives are respected and shared with the wider public. The monument demonstrates that architecture can do more than create structures; it can educate, commemorate, and encourage reflection. By embedding Indigenous identity into a national memorial, the design helps foster understanding between Indigenous and non-Indigenous Canadians while ensuring these histories remain visible for future generations.`;
+
 const IMAGES: CarouselImage[] = [
   {
     src: '/MONUMNET.png',
     alt: 'Circular Indigenous beadwork-style flowerbed in a memorial garden',
     caption: 'Memorial garden',
     reference: 'Google Earth',
+    description: DESCRIPTION_1,
   },
   {
     src: '/RESIDNETAILSCHOo.png',
     alt: 'Towering carved eagle sculpture above a residential school memorial installation',
     caption: 'Residential school memorial',
     reference: 'https://ottawacitizen.com/news/local-news/residential-school-memorial-monument-to-be-unveiled-at-museum-of-history',
-  },
-  {
-    src: '/nigmonet.png',
-    alt: 'The Gothic Revival West Block on Parliament Hill in Ottawa',
-    caption: 'Parliament Hill',
-    reference: 'https://commons.wikimedia.org/wiki/File:West_Block,_Parliament_of_Canada_(April_2019).jpg',
+    description: DESCRIPTION_2,
   },
 ];
 
