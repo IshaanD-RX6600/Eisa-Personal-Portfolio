@@ -7,14 +7,14 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 // as-is for the <img> src.
 const IMAGES: CarouselImage[] = [
   {
-    src: '/BCWHISTLER.png',
-    alt: 'Aerial view of a timber lodge among the forested mountains of Whistler, BC',
-    caption: 'Mountain lodge',
-  },
-  {
     src: '/WhistlerBC.png',
     alt: 'View of Whistler, BC',
     caption: 'Whistler view',
+  },
+  {
+    src: '/BCWHISTLER.png',
+    alt: 'Aerial view of a timber lodge among the forested mountains of Whistler, BC',
+    caption: 'Mountain lodge',
   },
   {
     src: '/INDIGENOUSMUSEAMBC.png',

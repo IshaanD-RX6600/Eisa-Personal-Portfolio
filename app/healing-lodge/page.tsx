@@ -7,14 +7,14 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 // URL-encoded for the <img> src.
 const IMAGES: CarouselImage[] = [
   {
-    src: '/HealingLodge.png',
-    alt: 'Ground-level view of the Okimaw Ohci Healing Lodge',
-    caption: 'Ground-level view',
-  },
-  {
     src: '/Screenshot%202026-06-15%20012104.png',
     alt: 'Aerial view of the Okimaw Ohci Healing Lodge',
     caption: 'Aerial view',
+  },
+  {
+    src: '/HealingLodge.png',
+    alt: 'Ground-level view of the Okimaw Ohci Healing Lodge',
+    caption: 'Ground-level view',
   },
   {
     src: '/HEALINGLODGEEEEEEEEEEE.png',

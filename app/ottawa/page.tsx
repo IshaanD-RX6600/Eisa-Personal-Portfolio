@@ -7,14 +7,14 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 // as-is for the <img> src.
 const IMAGES: CarouselImage[] = [
   {
-    src: '/RESIDNETAILSCHOo.png',
-    alt: 'Towering carved eagle sculpture above a residential school memorial installation',
-    caption: 'Residential school memorial',
-  },
-  {
     src: '/MONUMNET.png',
     alt: 'Circular Indigenous beadwork-style flowerbed in a memorial garden',
     caption: 'Memorial garden',
+  },
+  {
+    src: '/RESIDNETAILSCHOo.png',
+    alt: 'Towering carved eagle sculpture above a residential school memorial installation',
+    caption: 'Residential school memorial',
   },
   {
     src: '/nigmonet.png',

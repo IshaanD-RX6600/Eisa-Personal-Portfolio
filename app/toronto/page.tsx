@@ -7,6 +7,11 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 // as-is for the <img> src.
 const IMAGES: CarouselImage[] = [
   {
+    src: '/ILOVENATAN.png',
+    alt: 'Aerial view of Nathan Phillips Square and Toronto City Hall',
+    caption: 'Aerial view',
+  },
+  {
     src: '/NaathanFILLIPSSQUARe.png',
     alt: 'The TORONTO sign and painted canoe sculpture at Nathan Phillips Square',
     caption: 'TORONTO sign',
@@ -15,11 +20,6 @@ const IMAGES: CarouselImage[] = [
     src: '/NATANFILiP.png',
     alt: 'Carved stone turtle sculpture at Nathan Phillips Square',
     caption: 'Turtle sculpture',
-  },
-  {
-    src: '/ILOVENATAN.png',
-    alt: 'Aerial view of Nathan Phillips Square and Toronto City Hall',
-    caption: 'Aerial view',
   },
 ];
 
