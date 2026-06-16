@@ -191,7 +191,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
         {/* Current view label */}
         <div
           key={`cap-${index}`}
-          className="pointer-events-none absolute bottom-4 left-4 z-20 rounded-full bg-black/60 px-3 py-1 text-xs font-medium tracking-wide text-white/80 backdrop-blur-sm"
+          className="pointer-events-none absolute bottom-4 left-4 z-20 rounded-full bg-black/60 px-3.5 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm"
           style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
         >
           {images[index].caption}
@@ -199,7 +199,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
 
         {/* Slide counter */}
         {count > 1 && (
-          <div className="pointer-events-none absolute right-4 top-4 z-20 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium tabular-nums text-white/70 backdrop-blur-sm">
+          <div className="pointer-events-none absolute right-4 top-4 z-20 rounded-full bg-black/50 px-3 py-1.5 text-sm font-medium tabular-nums text-white/80 backdrop-blur-sm">
             {index + 1} / {count}
           </div>
         )}
@@ -244,13 +244,13 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
             className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-[var(--surface)] p-6 ring-1 ring-white/10"
             style={{ animation: reduced ? undefined : `carouselCaptionIn ${FADE_MS}ms ${EASE} both` }}
           >
-            <p className="text-base leading-relaxed text-white/80">{images[index].description}</p>
+            <p className="text-lg leading-relaxed text-white/85 sm:text-xl">{images[index].description}</p>
             {images[index].reference && isUrl(images[index].reference!) && (
               <a
                 href={images[index].reference}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-[var(--accent-2)] transition hover:text-[var(--accent-soft)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium uppercase tracking-wide text-[var(--accent-2)] transition hover:text-[var(--accent-soft)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 Source
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
