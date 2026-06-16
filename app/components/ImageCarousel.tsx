@@ -6,6 +6,7 @@ export interface CarouselImage {
   src: string;
   alt: string;
   caption: string;
+  reference?: string;
 }
 
 interface ImageCarouselProps {
@@ -42,6 +43,7 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
   const [prevIndex, setPrevIndex] = useState<number | null>(null); // exiting slide
   const [direction, setDirection] = useState(1); //                 1 fwd, -1 back
   const [animKey, setAnimKey] = useState(0); //                     retriggers anims
+  const [showReferences, setShowReferences] = useState(false); //    references modal
 
   // Current index mirrored to a ref so the imperative pointer/keyboard handlers
   // always read the latest value without re-binding.
@@ -238,6 +240,62 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
               }`}
             />
           ))}
+        </div>
+      )}
+
+      {/* References button — always visible */}
+      <div className="mt-6 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={() => setShowReferences(true)}
+          className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        >
+          View References
+        </button>
+      </div>
+
+      {/* References Modal */}
+      {showReferences && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setShowReferences(false)}
+        >
+          <div
+            className="max-h-96 w-full max-w-2xl overflow-y-auto rounded-2xl bg-black p-6 ring-1 ring-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-white">Image References</h2>
+              <button
+                type="button"
+                onClick={() => setShowReferences(false)}
+                aria-label="Close"
+                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+              >
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M12 4L4 12M4 4l8 8"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              {images.map((img, i) => (
+                <div key={img.src} className="border-l-2 border-white/20 pl-4">
+                  <p className="text-sm font-medium text-white">{img.caption}</p>
+                  {img.reference ? (
+                    <p className="mt-1 text-sm text-white/60">{img.reference}</p>
+                  ) : (
+                    <p className="mt-1 text-sm text-white/40 italic">No reference provided</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

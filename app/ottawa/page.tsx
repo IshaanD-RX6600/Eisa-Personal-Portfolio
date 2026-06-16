@@ -10,16 +10,19 @@ const IMAGES: CarouselImage[] = [
     src: '/MONUMNET.png',
     alt: 'Circular Indigenous beadwork-style flowerbed in a memorial garden',
     caption: 'Memorial garden',
+    reference: 'Google Earth',
   },
   {
     src: '/RESIDNETAILSCHOo.png',
     alt: 'Towering carved eagle sculpture above a residential school memorial installation',
     caption: 'Residential school memorial',
+    reference: 'https://ottawacitizen.com/news/local-news/residential-school-memorial-monument-to-be-unveiled-at-museum-of-history',
   },
   {
     src: '/nigmonet.png',
     alt: 'The Gothic Revival West Block on Parliament Hill in Ottawa',
     caption: 'Parliament Hill',
+    reference: 'https://commons.wikimedia.org/wiki/File:West_Block,_Parliament_of_Canada_(April_2019).jpg',
   },
 ];
 

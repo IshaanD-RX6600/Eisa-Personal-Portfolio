@@ -10,16 +10,19 @@ const IMAGES: CarouselImage[] = [
     src: '/WhistlerBC.png',
     alt: 'View of Whistler, BC',
     caption: 'Whistler view',
+    reference: 'Google Earth',
   },
   {
     src: '/BCWHISTLER.png',
     alt: 'Aerial view of a timber lodge among the forested mountains of Whistler, BC',
     caption: 'Mountain lodge',
+    reference: 'https://slcc.ca',
   },
   {
     src: '/INDIGENOUSMUSEAMBC.png',
-    alt: 'Carved totem poles outside the Squamish Lil’wat Cultural Centre',
+    alt: 'Carved totem poles outside the Squamish Lil\'wat Cultural Centre',
     caption: 'Cultural centre',
+    reference: 'https://www.whistler.com/blog/post/squamish-lilwat-cultural-centre/',
   },
 ];
 

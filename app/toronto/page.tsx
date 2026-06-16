@@ -10,16 +10,19 @@ const IMAGES: CarouselImage[] = [
     src: '/ILOVENATAN.png',
     alt: 'Aerial view of Nathan Phillips Square and Toronto City Hall',
     caption: 'Aerial view',
+    reference: 'Google Earth',
   },
   {
     src: '/NaathanFILLIPSSQUARe.png',
     alt: 'The TORONTO sign and painted canoe sculpture at Nathan Phillips Square',
     caption: 'TORONTO sign',
+    reference: 'https://devp.org/en/toronto-spirit-garden/',
   },
   {
     src: '/NATANFILiP.png',
     alt: 'Carved stone turtle sculpture at Nathan Phillips Square',
     caption: 'Turtle sculpture',
+    reference: 'https://www.cbc.ca/news/canada/toronto/indigenous-spirit-garden-toronto-residential-school-survivors-cultural-space-1.7337072',
   },
 ];
 
