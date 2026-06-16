@@ -6,7 +6,9 @@ import ImageCarousel, { type CarouselImage } from '../components/ImageCarousel';
 
 // The three views of the lodge. The screenshot filename has spaces, so it's
 // URL-encoded for the <img> src.
-const DESCRIPTION = `A regular prison is organized around control — its centre is a guard station and its logic is containment. Okimaw Ohci is organized around the opposite. At its centre is the Spiritual Lodge, where Elders lead teachings and ceremonies, and the whole site sits inside the forest instead of behind a wall. The women here are not called inmates; they are residents, and they are not kept behind bars. This matters for reconciliation because Canada's justice system has harmed Indigenous communities for generations and broken trust between Indigenous and non-Indigenous people. A building that chooses healing over punishment begins to rebuild that trust — it shows that Indigenous approaches to justice are valued, not dismissed. Architecture becomes the place where reconciliation stops being a word and turns into something a person actually lives.`;
+const FIRST_IMAGE_DESCRIPTION = `From above, Okimaw Ohci looks nothing like a prison. No cell blocks, no high walls, no straight rows of bars the buildings curve around a central circle with a Spiritual Lodge at the heart. That shape is a decision: a circle has no top and no bottom, no one looking down on anyone else. Opened in 1995 on Nekaneet First Nation land in Treaty 4 territory, Okimaw Ohci  "thunder hills" in Cree was the first federal healing lodge for women in Canada. This is where architecture starts to repair relationships: instead of a Western design being imposed on Indigenous people, the building was shaped by Indigenous values from the ground up. A country that builds Indigenous worldviews into its spaces, rather than erasing them, is taking a real step toward reconciliation.`;
+
+const DESCRIPTION = `A regular prison is organized around control  its centre is a guard station and its logic is containment. Okimaw Ohci is organized around the opposite. At its centre is the Spiritual Lodge, where Elders lead teachings and ceremonies, and the whole site sits inside the forest instead of behind a wall. The women here are not called inmates; they are residents, and they are not kept behind bars. This matters for reconciliation because Canada's justice system has harmed Indigenous communities for generations and broken trust between Indigenous and non-Indigenous people. A building that chooses healing over punishment begins to rebuild that trust — it shows that Indigenous approaches to justice are valued, not dismissed. Architecture becomes the place where reconciliation stops being a word and turns into something a person actually lives.`;
 
 const IMAGES: CarouselImage[] = [
   {
@@ -14,14 +16,13 @@ const IMAGES: CarouselImage[] = [
     alt: 'Aerial view of the Okimaw Ohci Healing Lodge',
     caption: 'Aerial view',
     reference: 'Google Earth',
-    description: DESCRIPTION,
+    description: FIRST_IMAGE_DESCRIPTION,
   },
   {
     src: '/HealingLodge.png',
     alt: 'Ground-level view of the Okimaw Ohci Healing Lodge',
     caption: 'Ground-level view',
     reference: 'https://salvationist.ca/articles/2016/02/okimaw-ohci-healing-lodge-salvation-army/',
-    description: DESCRIPTION,
   },
   {
     src: '/HEALINGLODGEEEEEEEEEEE.png',

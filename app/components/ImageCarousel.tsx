@@ -229,8 +229,8 @@ export default function ImageCarousel({ images }: ImageCarouselProps) {
           </div>
         </div>
 
-        {/* Description panel — appears on the right only for the third slide */}
-        {images[index].description && index === 2 && (
+        {/* Description panel — appears on the right for any slide with a description */}
+        {images[index].description && (
           <div
             key={`desc-${index}`}
             className="w-full lg:w-1/3 flex flex-col justify-center rounded-2xl bg-white/5 backdrop-blur-sm p-6 ring-1 ring-white/10"
